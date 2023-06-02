@@ -2,12 +2,15 @@ package com.kashif.android
 
 import android.app.Application
 import com.kashif.common.di.initKoin
+import com.kashif.common.platformModule
+import org.koin.android.ext.koin.androidContext
 
 class App : Application() {
-
     override fun onCreate() {
         super.onCreate()
-        // TODO: Change your base url from here
-        initKoin(enableNetworkLogs = true, baseUrl = "Your base url here") {}
+        initKoin {
+            androidContext(this@App)
+            modules(platformModule())
+        }
     }
 }

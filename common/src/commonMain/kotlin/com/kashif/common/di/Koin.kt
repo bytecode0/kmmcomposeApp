@@ -1,6 +1,15 @@
 package com.kashif.common.di
 
+import com.kashif.common.data.BreedsRemoteSource
+import com.kashif.common.data.BreedsRepository
+import com.kashif.common.data.IBreedsRemoteSource
+import com.kashif.common.data.api.BreedsApi
+import com.kashif.common.domain.GetBreedsUseCase
 import com.kashif.common.platformModule
+import com.kashif.common.util.INetworkConnectivityChecker
+import com.kashif.common.util.NetworkConnectivityChecker
+import com.kashif.common.util.getDispatcherProvider
+import com.kashif.common.view.MainViewModel
 import io.ktor.client.*
 import io.ktor.client.engine.*
 import io.ktor.client.plugins.*
@@ -13,17 +22,46 @@ import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
-fun initKoin(
-    enableNetworkLogs: Boolean = false,
-    baseUrl: String,
-    appDeclaration: KoinAppDeclaration = {},
-) = startKoin {
+fun initKoin(appDeclaration: KoinAppDeclaration) = startKoin {
+    modules(sharedModules)
     appDeclaration()
-    modules(commonModule(enableNetworkLogs = enableNetworkLogs, baseUrl))
 }
 
 // called by iOS etc
-fun initKoin(baseUrl: String) = initKoin(enableNetworkLogs = true, baseUrl = baseUrl) {}
+fun initKoin(baseUrl: String) = startKoin {
+    modules(sharedModules)
+}
+
+private val utilityModule = module {
+    factory { getDispatcherProvider() }
+}
+
+private val apiModule = module {
+    single { createJson() }
+
+    single { createHttpClient(get(), get(), enableNetworkLogs = false) }
+
+    single<INetworkConnectivityChecker> { NetworkConnectivityChecker() }
+
+    factory { BreedsApi() }
+}
+
+private val repositoryModule = module {
+    factory { BreedsRepository() }
+
+    factory<IBreedsRemoteSource> { BreedsRemoteSource(get(), get()) }
+}
+
+private val useCaseModule = module {
+    factory { GetBreedsUseCase() }
+}
+
+private val viewModelModule = module {
+    factory { MainViewModel() }
+}
+
+private val sharedModules = listOf(viewModelModule, useCaseModule, repositoryModule, apiModule, utilityModule)
+
 
 fun commonModule(
     enableNetworkLogs: Boolean,

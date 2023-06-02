@@ -115,3 +115,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
+dependencies {
+    implementation("androidx.compose.foundation:foundation:1.4.3")
+}
