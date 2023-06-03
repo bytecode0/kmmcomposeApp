@@ -66,23 +66,15 @@ internal fun App(platform: String) {
     val viewModel: MainViewModel = remember { MainViewModel() }
     val breedsStateFlow by viewModel.breeds.collectAsState()
     var text by remember { mutableStateOf("Hello, World!") }
-    var showImage by remember { mutableStateOf(false) }
-
-    AnimatedVisibility(showImage) {
-        TopLayout(
-            alignLeftContent = {
-                Text("Dogify")
-            },
-            alignRightContent = {},
-        )
-    }
+    var showImage by remember { mutableStateOf(true) }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceAround
         ) {
-            Button(
+            /*
+            * Button(
                 onClick = {
                     text = "Hello, $platform"
                     showImage = !showImage
@@ -90,6 +82,7 @@ internal fun App(platform: String) {
             ) {
                 Text(text)
             }
+            * */
             AnimatedVisibility(showImage) {
                 MainCommon(breedsStateFlow)
             }
@@ -142,10 +135,31 @@ internal fun GalleryScreen(
     breedsStateFlow: BreedsUIState<Any>,
     onClickPreviewPicture: (breed: Breed) -> Unit
 ) {
-    when (breedsStateFlow) {
-        is BreedsUIState.Loading -> LoadingView()
-        is BreedsUIState.Success -> BreedsGridView(breedsStateFlow.breeds.toMutableStateList(), onClickPreviewPicture)
-        is BreedsUIState.Error -> LoadingView()
+    Box(Modifier
+        .fillMaxSize()
+        .background(color = DogifyColors.fullScreenImageBackground)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row {
+                TopLayout(
+                    alignLeftContent = {
+                        Text("Dogify")
+                    },
+                    alignRightContent = {},
+                )
+            }
+            Row {
+                when (breedsStateFlow) {
+                    is BreedsUIState.Loading -> LoadingView()
+                    is BreedsUIState.Success -> BreedsGridView(breedsStateFlow.breeds.toMutableStateList(), onClickPreviewPicture)
+                    is BreedsUIState.Error -> LoadingView()
+                }
+            }
+        }
     }
 }
 
@@ -177,7 +191,7 @@ internal fun FullscreenImageScreen(
                 Button(
                     onClick = back
                 ) {
-                    Text("Back")
+                    Icon(IconCustomArrowBack, null, Modifier.size(34.dp), Color.White)
                 }
             },
             alignRightContent = {},
@@ -210,8 +224,8 @@ internal fun TopLayout(
     Box(
         Modifier
             .fillMaxWidth()
+            .notchPadding()
             .padding(12.dp)
-            .background(DogifyColors.fullScreenImageBackground)
     ) {
         Row(Modifier.align(Alignment.CenterStart)) {
             alignLeftContent()
@@ -231,6 +245,7 @@ internal fun CardView(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(4.dp)
             .clickable { onClickPreviewPicture(breed) },
         elevation = 4.dp
     ) {
