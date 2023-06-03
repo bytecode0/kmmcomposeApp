@@ -15,7 +15,6 @@ class MainViewModel: KoinComponent {
     private val dispatcherProvider: DispatcherProvider = get()
     private val getBreedsUseCase: GetBreedsUseCase = get()
     private val viewModelScope = CoroutineScope(dispatcherProvider.io)
-
     private val _breedsStateFlow = MutableStateFlow<BreedsUIState<Any>>(BreedsUIState.Loading)
     val breeds: StateFlow<BreedsUIState<Any>> = _breedsStateFlow
 

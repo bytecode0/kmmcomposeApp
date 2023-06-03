@@ -24,16 +24,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,15 +38,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.kashif.common.domain.Breed
+import com.kashif.common.domain.ScalableState
 import com.kashif.common.view.BreedsUIState
 import com.kashif.common.view.MainViewModel
+import com.kashif.common.view.NavigationStack
+import com.kashif.common.view.icon.IconCustomArrowBack
+import com.kashif.common.view.style.DogifyColors
 import com.seiko.imageloader.ImageRequestState
 import com.seiko.imageloader.rememberAsyncImagePainter
 import kotlinx.coroutines.delay
@@ -60,6 +67,15 @@ internal fun App(platform: String) {
     val breedsStateFlow by viewModel.breeds.collectAsState()
     var text by remember { mutableStateOf("Hello, World!") }
     var showImage by remember { mutableStateOf(false) }
+
+    AnimatedVisibility(showImage) {
+        TopLayout(
+            alignLeftContent = {
+                Text("Dogify")
+            },
+            alignRightContent = {},
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
@@ -75,9 +91,27 @@ internal fun App(platform: String) {
                 Text(text)
             }
             AnimatedVisibility(showImage) {
-                HomeComponent(breedsStateFlow)
+                MainCommon(breedsStateFlow)
             }
         }
+    }
+}
+
+@Composable
+internal fun MainCommon(breedsStateFlow: BreedsUIState<Any>) {
+    val navigationStack: NavigationStack<Page> = remember { NavigationStack(GalleryPage()) }
+
+    when (val page = navigationStack.lastWithIndex().value) {
+        is GalleryPage -> GalleryScreen(
+            breedsStateFlow,
+            onClickPreviewPicture = { breed ->
+                navigationStack.push(FullScreenPage(breed))
+            }
+        )
+        is FullScreenPage -> FullscreenImageScreen(
+            breed = page.breed,
+            back = { navigationStack.back() }
+        )
     }
 }
 
@@ -104,32 +138,100 @@ internal fun AsyncImage(url: String, modifier: Modifier) {
 }
 
 @Composable
-internal fun HomeComponent(breedsStateFlow: BreedsUIState<Any>) {
+internal fun GalleryScreen(
+    breedsStateFlow: BreedsUIState<Any>,
+    onClickPreviewPicture: (breed: Breed) -> Unit
+) {
     when (breedsStateFlow) {
         is BreedsUIState.Loading -> LoadingView()
-        is BreedsUIState.Success -> BreedsGridView(breedsStateFlow.breeds)
+        is BreedsUIState.Success -> BreedsGridView(breedsStateFlow.breeds.toMutableStateList(), onClickPreviewPicture)
         is BreedsUIState.Error -> LoadingView()
     }
 }
 
 @Composable
-internal fun BreedsGridView(breeds: List<Breed>) {
+internal fun FullscreenImageScreen(
+    breed: Breed,
+    back: () -> Unit
+) {
+    Box(Modifier.fillMaxSize().background(color = DogifyColors.fullScreenImageBackground)) {
+        val scalableState = remember { ScalableState() }
+
+        AsyncImage(
+            url = breed.imageUrl,
+            modifier =  Modifier.fillMaxSize().clipToBounds()
+        )
+        Column(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                .background(DogifyColors.filterButtonsBackground)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+        }
+
+        TopLayout(
+            alignLeftContent = {
+                Button(
+                    onClick = back
+                ) {
+                    Text("Back")
+                }
+            },
+            alignRightContent = {},
+        )
+    }
+}
+
+@Composable
+internal fun BreedsGridView(
+    breeds: SnapshotStateList<Breed>,
+    onClickPreviewPicture: (breed: Breed) -> Unit
+) {
     LazyVerticalGrid(
-        modifier = Modifier.padding(top = 4.dp),
-        columns = GridCells.Adaptive(minSize = 130.dp),
+        modifier = Modifier.padding(top = 2.dp),
+        columns = GridCells.Adaptive(minSize = 180.dp),
         verticalArrangement = Arrangement.spacedBy(1.dp),
         horizontalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         items(breeds) {
-            CardView(it)
+            CardView(it, onClickPreviewPicture)
         }
     }
 }
 
 @Composable
-internal fun CardView(breed: Breed) {
+internal fun TopLayout(
+    alignLeftContent: @Composable () -> Unit = {},
+    alignRightContent: @Composable () -> Unit = {},
+) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+            .background(DogifyColors.fullScreenImageBackground)
+    ) {
+        Row(Modifier.align(Alignment.CenterStart)) {
+            alignLeftContent()
+        }
+        Row(Modifier.align(Alignment.CenterEnd)) {
+            alignRightContent()
+        }
+    }
+}
+
+
+@Composable
+internal fun CardView(
+    breed: Breed,
+    onClickPreviewPicture: (breed: Breed) -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClickPreviewPicture(breed) },
         elevation = 4.dp
     ) {
         Column(
