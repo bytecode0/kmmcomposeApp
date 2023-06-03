@@ -3,7 +3,6 @@ package com.kashif.common.view.icon
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
 
-// TODO Copied from "material:material-icons-extended", because this artifact is not working on iOS for now
 val IconMenu = materialIcon(name = "Filled.Menu") {
     materialPath {
         moveTo(3.0f, 18.0f)

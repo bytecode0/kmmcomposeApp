@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -56,6 +58,7 @@ import com.kashif.common.view.BreedsUIState
 import com.kashif.common.view.MainViewModel
 import com.kashif.common.view.NavigationStack
 import com.kashif.common.view.icon.IconCustomArrowBack
+import com.kashif.common.view.icon.IconGridView
 import com.kashif.common.view.icon.IconMenu
 import com.kashif.common.view.style.DogifyColors
 import com.seiko.imageloader.ImageRequestState
@@ -121,14 +124,18 @@ internal fun AsyncImage(url: String, modifier: Modifier) {
     }
 }
 
+enum class GalleryStyle {
+    SQUARES,
+    LIST
+}
+
 @Composable
 internal fun GalleryScreen(
     breedsStateFlow: BreedsUIState<Any>,
     onClickPreviewPicture: (breed: Breed) -> Unit
 ) {
-    Box(Modifier
-        .fillMaxSize()
-    ) {
+    val galleryStyle = remember { mutableStateOf(GalleryStyle.SQUARES) }
+    Box(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .padding(16.dp),
@@ -142,17 +149,24 @@ internal fun GalleryScreen(
                     alignRightContent = {
                         Box(modifier =
                         Modifier
-                            .size(60.dp)
+                            .size(48.dp)
                             .clip(CircleShape)
                             .background(DogifyColors.uiLightBlack)
                             .run {
                                 clickable {
-                                    //TODO: Add navigation to settings
+                                    if (galleryStyle.value == GalleryStyle.SQUARES) {
+                                        galleryStyle.value = GalleryStyle.LIST
+                                    } else {
+                                        galleryStyle.value = GalleryStyle.SQUARES
+                                    }
                                 }
                             },
                             contentAlignment = Alignment.Center,
                         ) {
-                            Icon(IconMenu, null, Modifier.size(34.dp), Color.White)
+                            when(galleryStyle.value) {
+                                GalleryStyle.SQUARES -> Icon(IconMenu, null, Modifier.size(34.dp), Color.White)
+                                GalleryStyle.LIST -> Icon(IconGridView, null, Modifier.size(34.dp), Color.White)
+                            }
                         }
                     },
                 )
@@ -160,7 +174,16 @@ internal fun GalleryScreen(
             Row {
                 when (breedsStateFlow) {
                     is BreedsUIState.Loading -> LoadingView()
-                    is BreedsUIState.Success -> BreedsGridView(breedsStateFlow.breeds.toMutableStateList(), onClickPreviewPicture)
+                    is BreedsUIState.Success -> {
+                        when (galleryStyle.value) {
+                            GalleryStyle.SQUARES -> {
+                                BreedsGridView(breedsStateFlow.breeds.toMutableStateList(), onClickPreviewPicture)
+                            }
+                            GalleryStyle.LIST -> {
+                                BreedsListView(breedsStateFlow.breeds.toMutableStateList(), onClickPreviewPicture)
+                            }
+                        }
+                    }
                     is BreedsUIState.Error -> LoadingView()
                 }
             }
@@ -221,6 +244,21 @@ internal fun BreedsGridView(
         columns = GridCells.Adaptive(minSize = 124.dp),
         verticalArrangement = Arrangement.spacedBy(1.dp),
         horizontalArrangement = Arrangement.spacedBy(1.dp)
+    ) {
+        items(breeds) {
+            CardView(it, onClickPreviewPicture)
+        }
+    }
+}
+
+@Composable
+internal fun BreedsListView(
+    breeds: SnapshotStateList<Breed>,
+    onClickPreviewPicture: (breed: Breed) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.padding(top = 2.dp),
+        verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         items(breeds) {
             CardView(it, onClickPreviewPicture)
