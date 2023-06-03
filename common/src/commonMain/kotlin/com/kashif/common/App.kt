@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -46,16 +45,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kashif.common.domain.Breed
 import com.kashif.common.domain.ScalableState
 import com.kashif.common.view.BreedsUIState
 import com.kashif.common.view.MainViewModel
 import com.kashif.common.view.NavigationStack
 import com.kashif.common.view.icon.IconCustomArrowBack
+import com.kashif.common.view.icon.IconMenu
 import com.kashif.common.view.style.DogifyColors
 import com.seiko.imageloader.ImageRequestState
 import com.seiko.imageloader.rememberAsyncImagePainter
@@ -73,16 +74,6 @@ internal fun App(platform: String) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceAround
         ) {
-            /*
-            * Button(
-                onClick = {
-                    text = "Hello, $platform"
-                    showImage = !showImage
-                }
-            ) {
-                Text(text)
-            }
-            * */
             AnimatedVisibility(showImage) {
                 MainCommon(breedsStateFlow)
             }
@@ -137,7 +128,6 @@ internal fun GalleryScreen(
 ) {
     Box(Modifier
         .fillMaxSize()
-        .background(color = DogifyColors.fullScreenImageBackground)
     ) {
         Column(
             modifier = Modifier
@@ -147,9 +137,24 @@ internal fun GalleryScreen(
             Row {
                 TopLayout(
                     alignLeftContent = {
-                        Text("Dogify")
+                        Text("🐶 Dogify", style = TextStyle(color = Color.Black, fontSize = 24.sp))
                     },
-                    alignRightContent = {},
+                    alignRightContent = {
+                        Box(modifier =
+                        Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(DogifyColors.uiLightBlack)
+                            .run {
+                                clickable {
+                                    //TODO: Add navigation to settings
+                                }
+                            },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(IconMenu, null, Modifier.size(34.dp), Color.White)
+                        }
+                    },
                 )
             }
             Row {
@@ -188,8 +193,15 @@ internal fun FullscreenImageScreen(
 
         TopLayout(
             alignLeftContent = {
-                Button(
-                    onClick = back
+                Box(modifier =
+                    Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(DogifyColors.uiLightBlack)
+                        .run {
+                            clickable { back() }
+                        },
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(IconCustomArrowBack, null, Modifier.size(34.dp), Color.White)
                 }
@@ -206,7 +218,7 @@ internal fun BreedsGridView(
 ) {
     LazyVerticalGrid(
         modifier = Modifier.padding(top = 2.dp),
-        columns = GridCells.Adaptive(minSize = 180.dp),
+        columns = GridCells.Adaptive(minSize = 124.dp),
         verticalArrangement = Arrangement.spacedBy(1.dp),
         horizontalArrangement = Arrangement.spacedBy(1.dp)
     ) {
@@ -341,41 +353,3 @@ internal fun LoadingView() {
         }
     }
 }
-
-/*@OptIn(ExperimentalUnitApi::class)
-@Composable
-fun ErrorView(
-    title: String,
-    message: String
-) {
-    Scaffold {
-        Column(
-            Modifier
-                .padding(4.dp)
-                .fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(8.dp)
-            ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = title,
-                    textAlign = TextAlign.Center,
-                    fontStyle = FontStyle.Italic,
-                    fontSize = TextUnit(value = 36F, TextUnitType.Sp)
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = message,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}*/
