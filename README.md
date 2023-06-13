@@ -9,7 +9,7 @@ for the following platforms:
 <li> Desktop </li>
 </ul>
 
-![Screenshot 2023-06-14 at 8 06 39 PM](https://raw.githubusercontent.com/bytecode0/kmmcomposeApp/master/dogify_app.jpgv)
+![Screenshot 2023-06-14 at 8 06 39 PM](https://raw.githubusercontent.com/bytecode0/kmmcomposeApp/master/dogify_app.jpg)
 
 # How it works?
 KMMComposeApp leverages the power of Kotlin Multiplatform and Compose Multiplatform to create a unified codebase for all target platforms. Here's how it works for each platform:
