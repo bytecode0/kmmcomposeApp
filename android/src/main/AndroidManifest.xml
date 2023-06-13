@@ -2,12 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.kashif.android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-            android:name=".App"
+            android:name="com.dogify.android.App"
             android:allowBackup="false"
             android:supportsRtl="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
-            android:name=".MainActivity"
+            android:name="com.dogify.android.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

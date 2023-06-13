@@ -8,7 +8,7 @@ plugins {
 
 //TODO: change your group
 
-group = "com.kashif"
+group = "com.dogify"
 version = "1.0-SNAPSHOT"
 
 fun composeDependency(groupWithArtifact: String) = "$groupWithArtifact:${libs.versions.compose}"
@@ -117,4 +117,5 @@ android {
 }
 dependencies {
     implementation("androidx.compose.foundation:foundation:1.4.3")
+    implementation("androidx.lifecycle:lifecycle-common:2.6.1")
 }
