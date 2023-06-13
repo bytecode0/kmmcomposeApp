@@ -5,7 +5,7 @@
 Featured in  <a href= "https://us12.campaign-archive.com/?u=f39692e245b94f7fb693b6d82&id=c0b6a6fd66"> Kotlin weekly </a> and <a href= "https://us12.campaign-archive.com/?u=f39692e245b94f7fb693b6d82&id=78f6f6dd04"> Kotlin weeekly </a>
 
 
-The KMPTemplate is designed to help developers build applications for three platforms:
+The kmmcomposeApp is designed to help developers build applications for three platforms:
 <ul>
 <li> Android </li>
 <li> iOS </li>
@@ -19,7 +19,7 @@ This is built to reduce the effort of configuring all the targets together such 
 
 
 # How it works?
-KMPTemplate leverages the power of Kotlin Multiplatform and Compose Multiplatform to create a unified codebase for all target platforms. Here's how it works for each platform:
+kmmcomposeApp leverages the power of Kotlin Multiplatform and Compose Multiplatform to create a unified codebase for all target platforms. Here's how it works for each platform:
 
 <ul>
 <li><b>Android:</b> Runs natively on Android devices. </li>
